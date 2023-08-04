@@ -18,7 +18,7 @@ options(scipen = 1, digits = 4, width = 80, fig.align = "center")
 
 ## Introduction:
 
-The data file contains per-game statistics of NBA players for every season from 1946 to
+The data file contains per-game statistics of NBA players for every season from 1949 to
 2023. The dataset includes essential variables such as:
 
  - Player: The name of the player
