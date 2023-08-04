@@ -18,6 +18,40 @@ options(scipen = 1, digits = 4, width = 80, fig.align = "center")
 
 ## Introduction:
 
+The data file contains per-game statistics of NBA players for every season from 1946 to
+2023. The dataset includes essential variables such as:
+
+ - Player: The name of the player
+ - Team Name: The name of the NBA team the player is a part of.
+ - Ranking: The player’s ranking during the respective season.
+ - Points: The total points scored by the player during the season.
+ - Field Goals (FG): The number of successful field goals made by the player.
+ - Field Goal Attempts (FGA): The total number of field goal attempts by the player.
+ - 2-Point Field Goals (2P): The number of successful two-point field goals made.
+ - 2-Point Field Goal Attempts (2PA): The total number of two-point field goal attempts.
+ - Free Throws (FT): The number of successful free throws made.
+ - Assists (AST): The total assists made by the player.
+ - Fouls (FL): The total number of fouls committed by the player.
+ - Rebounds (REB): The total number of rebounds grabbed by the player.
+
+The NBA per-game statistics dataset is a valuable resource for understanding players
+performance and trends over the past decades. The data needs to be collected from
+sports databases. The source for the NBA per-game statistics dataset is the following:
+
+ - https://www.basketball-reference.com/leagues/NBA_2023_per_game.html
+
+We will gather per-game statistics from the cited source covering seasons from 1946 to
+2023. The data needs to be compiled and a new column for the corresponding season
+year will be added to facilitate analysis. The dataset will contain a total of 31 variables.
+There are about 200-600 players per season. Once the data is compiled, we will be able
+to meet the 2,000-observation threshold.
+
+Our interest in this dataset is driven by our passion for sports, particularly basketball,
+and our curiosity about how players performances have evolved over time. By analyzing
+the data, we aim to gain insights into the patterns and correlations that determine
+players performance. We believe that understanding the factors influencing rankings
+can provide valuable insights for coaches, analysts, and team managers in optimizing
+strategies, player selection, and overall team development.
 
 ## Methods:
 
