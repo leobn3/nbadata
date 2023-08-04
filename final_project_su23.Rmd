@@ -1,0 +1,32 @@
+---
+title: "Analyzing NBA Player Performance Over Time"
+author: "Daniela Nieto, Leopoldo Nikonowicz"
+date: "August 3, 2023"
+output:
+  pdf_document: default
+  html_document: 
+    theme: readable
+    toc: yes
+urlcolor: cyan
+---
+
+***
+
+```{r setup, echo = FALSE, message = FALSE, warning = FALSE}
+options(scipen = 1, digits = 4, width = 80, fig.align = "center")
+```
+
+## Introduction:
+
+
+## Methods:
+
+```{r pressure, echo=FALSE}
+
+```
+
+## Results
+
+## Discussion
+
+## Appendix
