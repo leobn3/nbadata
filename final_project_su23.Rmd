@@ -69,8 +69,67 @@ plot_qq = function(model, pointcol = "dodgerblue", linecol = "darkorange") {
 }
 ```
 
-```{r pressure, echo=FALSE}
 
+```{r pressure, echo=FALSE}
+NBA_data = read.csv("NBA_data.csv")
+
+clean_nba_data = na.omit(NBA_data)
+```
+
+```{r}
+nba_model = lm(Rk ~ ., data = clean_nba_data)
+```
+
+```{r}
+summary(nba_model)
+plot_qq(nba_model)
+plot_fitted_resid(nba_model)
+```
+
+
+```{r}
+nba_model_log = lm(log(Rk) ~ ., data = clean_nba_data)
+```
+
+```{r}
+summary(nba_model_log)
+plot_qq(nba_model_log)
+plot_fitted_resid(nba_model_log)
+```
+
+
+
+```{r}
+nba_model_age = lm(Age ~ ., data = clean_nba_data)
+```
+
+```{r}
+summary(nba_model_age)
+plot_qq(nba_model_age)
+plot_fitted_resid(nba_model_age)
+```
+
+
+```{r}
+nba_model_FG = lm(FG ~ ., data = clean_nba_data)
+```
+
+```{r}
+summary(nba_model_FG)
+plot_qq(nba_model_FG)
+plot_fitted_resid(nba_model_FG)
+```
+
+
+```{r}
+
+nba_model_FG_log = lm(resid(FG) ~ ., data = clean_nba_data)
+```
+
+```{r}
+summary(nba_model_FG_log)
+plot_qq(nba_model_FG_log)
+plot_fitted_resid(nba_model_FG_log)
 ```
 
 ## Results
