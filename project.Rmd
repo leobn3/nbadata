@@ -1,0 +1,210 @@
+---
+title: "Untitled"
+output: html_document
+date: "2023-07-28"
+---
+
+```{r, message = FALSE, warning = FALSE}
+library(faraway)
+library(lmtest)
+library(leaps)
+library(ggplot2)
+library(readr)
+```
+
+*Load data*
+```{r, message = FALSE}
+nba = read_csv("NBA_data.csv")
+str(nba)
+```
+*Modified names*
+```{r, message = FALSE}
+names(nba)[names(nba) == "3P"] = "ThreeP"
+names(nba)[names(nba) == "3PA"] = "ThreePA"
+names(nba)[names(nba) == "3P%"] = "ThreePP"
+
+names(nba)[names(nba) == "2P"] = "TwoP"
+names(nba)[names(nba) == "2PA"] = "TwoPA"
+names(nba)[names(nba) == "2P%"] = "TwoPP"
+
+names(nba)[names(nba) == "FG%"] = "FGP"
+names(nba)[names(nba) == "eFG%"] = "eFGP"
+names(nba)[names(nba) == "FT%"] = "FTP"
+```
+
+```{r, message = FALSE}
+three_pointers = nba[, c("ThreeP", "ThreePA", "ThreePP")]
+pairs(three_pointers)
+```
+
+```{r, message = FALSE}
+two_pointers = nba[, c("TwoP", "TwoPA", "TwoPP")]
+pairs(two_pointers)
+```
+
+```{r, message = FALSE}
+free_throw = nba[, c("FT", "FTA", "FTP")]
+pairs(free_throw)
+```
+
+```{r, message = FALSE}
+field_goals = nba[, c("FG", "FGA", "FGP", "eFGP")]
+pairs(field_goals)
+```
+
+```{r, message = FALSE}
+rebounds = nba[, c("ORB", "DRB", "TRB")]
+pairs(rebounds)
+```
+
+```{r, message = FALSE}
+percentage = nba[, c("FGP", "ThreePP", "TwoPP", "eFGP", "FTP", "TRB")]
+pairs(percentage)
+```
+
+```{r, message = FALSE}
+games = nba[, c("G", "GS", "MP")]
+pairs(games)
+```
+
+
+```{r, echo = FALSE}
+plot_fitted_resid = function(model, pointcol = "dodgerblue", linecol = "darkorange") {
+  plot(fitted(model), resid(model), 
+       col = pointcol, pch = 20, cex = 1.5,
+       xlab = "Fitted", ylab = "Residuals")
+  abline(h = 0, col = linecol, lwd = 2)
+}
+
+plot_qq = function(model, pointcol = "dodgerblue", linecol = "darkorange") {
+  qqnorm(resid(model), col = pointcol, pch = 20, cex = 1.5)
+  qqline(resid(model), col = linecol, lwd = 2)
+}
+```
+
+```{r, message = FALSE, warning = FALSE}
+library(lmtest)
+
+get_bp_decision = function(model, alpha) {
+  decide = unname(bptest(model)$p.value < alpha)
+  ifelse(decide, "Reject", "Fail to Reject")
+}
+
+get_sw_decision = function(model, alpha) {
+  decide = unname(shapiro.test(resid(model))$p.value < alpha)
+  ifelse(decide, "Reject", "Fail to Reject")
+}
+
+get_num_params = function(model) {
+  length(coef(model))
+}
+
+get_loocv_rmse = function(model) {
+  sqrt(mean((resid(model) / (1 - hatvalues(model))) ^ 2))
+}
+
+get_adj_r2 = function(model) {
+  summary(model)$adj.r.squared
+}
+```
+
+
+Rk -- Rank
+Pos -- Position
+Age -- Player's age on February 1 of the season
+Tm -- Team
+G -- Games
+GS -- Games Started
+MP -- Minutes Played Per Game
+FG -- Field Goals Per Game
+FGA -- Field Goal Attempts Per Game
+FG% -- Field Goal Percentage
+3P -- 3-Point Field Goals Per Game
+3PA -- 3-Point Field Goal Attempts Per Game
+3P% -- 3-Point Field Goal Percentage
+2P -- 2-Point Field Goals Per Game
+2PA -- 2-Point Field Goal Attempts Per Game
+2P% -- 2-Point Field Goal Percentage
+eFG% -- Effective Field Goal Percentage
+This statistic adjusts for the fact that a 3-point field goal is worth one more point than a 2-point field goal.
+FT -- Free Throws Per Game
+FTA -- Free Throw Attempts Per Game
+FT% -- Free Throw Percentage
+ORB -- Offensive Rebounds Per Game
+DRB -- Defensive Rebounds Per Game
+TRB -- Total Rebounds Per Game
+AST -- Assists Per Game
+STL -- Steals Per Game
+BLK -- Blocks Per Game
+TOV -- Turnovers Per Game
+PF -- Personal Fouls Per Game
+PTS -- Points Per Game
+
+
+```{r, message = FALSE}
+# Remove columns
+nba = read_csv("NBA_data.csv")
+names(nba)[names(nba) == "3P"] = "ThreeP"
+names(nba)[names(nba) == "3PA"] = "ThreePA"
+names(nba)[names(nba) == "3P%"] = "ThreePP"
+
+names(nba)[names(nba) == "2P"] = "TwoP"
+names(nba)[names(nba) == "2PA"] = "TwoPA"
+names(nba)[names(nba) == "2P%"] = "TwoPP"
+
+names(nba)[names(nba) == "FG%"] = "FGP"
+names(nba)[names(nba) == "eFG%"] = "eFGP"
+names(nba)[names(nba) == "FT%"] = "FTP"
+nba = nba[, -which(names(nba) == "Player"| names(nba) == "Pos" | names(nba) == "Tm" |
+                      names(nba) == "FGP" | names(nba) == "FGA" | names(nba) == "ThreePP" | names(nba) == "ThreePA" | 
+                      names(nba) == "TwoPP" | names(nba) == "TwoPA" | names(nba) == "FTP"|
+                      names(nba) == "FTA" | names(nba) == "ORB" | names(nba) == "DRB")]
+
+# Remove rows with missing values
+cleaned_nba = na.omit(nba)
+cleaned_nba = cleaned_nba[cleaned_nba$PTS != 0, ]
+cleaned_nba = cleaned_nba[cleaned_nba$eFGP < 1 & cleaned_nba$eFGP > 0, ]
+cleaned_nba$eFGP = cleaned_nba$eFGP*100
+```
+
+*BACK BIC*
+```{r, message = FALSE}
+# Create large model
+large_model = lm(PTS ~ ., data = cleaned_nba)
+
+n = nrow(cleaned_nba)
+
+# Perform backward stepwise selection
+back_bic = step(large_model, k = log(n), trace = 0)
+vif(back_bic)
+back_bic = lm(PTS ~ G + FG + FT, data = cleaned_nba)
+vif(back_bic)
+```
+
+```{r, echo = FALSE}
+plot_fitted_resid(back_bic)
+plot_qq(back_bic)
+```
+
+```{r}
+get_loocv_rmse(back_bic)
+get_adj_r2(back_bic)
+get_num_params(back_bic)
+```
+
+```{r}
+int_model = lm(PTS ~ G * FG * FT, data = cleaned_nba)
+```
+
+
+```{r, echo = FALSE}
+plot_fitted_resid(int_model)
+plot_qq(int_model)
+anova(back_bic, int_model)
+```
+
+```{r, eval = FALSE}
+get_loocv_rmse(int_model)
+get_adj_r2(int_model)
+get_num_params(int_model)
+```
