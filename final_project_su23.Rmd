@@ -3,10 +3,10 @@ title: "Analyzing NBA Player Performance Over Time"
 author: "Daniela Nieto, Leopoldo Nikonowicz"
 date: "August 3, 2023"
 output:
-  pdf_document: default
   html_document: 
     theme: readable
     toc: yes
+  pdf_document: default
 urlcolor: cyan
 ---
 
@@ -95,10 +95,12 @@ get_adj_r2 = function(model) {
 
 *Load data and Modified names*
 
-Utilizing the set of variables within the dataset would often confuse R; therefore, the names were adjusted for enhanced usability.
+Before constructing predictive models, we performed data preprocessing to ensure the reliability and relevance of our analysis. We loaded the dataset and modified variable names to enhance usability. This step was crucial in preventing naming conflicts and making the dataset more manageable for subsequent analysis. We also addressed collinearity issues by identifying and removing correlated variables, such as various field goal percentages and attempts. For instance, we removed variables like field goal percentage (FGP), three-point percentage (ThreePP), and free-throw percentage (FTP), which exhibited collinearity with other variables. Missing values were handled by removing corresponding rows, ensuring that our analysis was conducted on a complete and representative subset of the data.
+
 *Modified names*
 ```{r, message = FALSE}
 nba = read_csv("NBA_data.csv")
+
 names(nba)[names(nba) == "3P"] = "ThreeP"
 names(nba)[names(nba) == "3PA"] = "ThreePA"
 names(nba)[names(nba) == "3P%"] = "ThreePP"
@@ -110,7 +112,7 @@ names(nba)[names(nba) == "2P%"] = "TwoPP"
 names(nba)[names(nba) == "FG%"] = "FGP"
 names(nba)[names(nba) == "eFG%"] = "eFGP"
 names(nba)[names(nba) == "FT%"] = "FTP"
-
+raw_nba = nba
 ```
 
 The purpose of this was to assess the data for collinearity issues, with additional examples provided in the appendix.
@@ -120,9 +122,6 @@ three_pointers = nba[, c("ThreeP", "ThreePA", "ThreePP")]
 pairs(three_pointers)
 ```
 
-
-Due to the presence of several missing values, the rows containing such data were removed from the set. The data showing collinearity issues where
-also removed from the set.
 
 ```{r}
 
@@ -176,7 +175,7 @@ get_num_params(back_bic)
 plot_model(int_model)
 ```
 
-```{r, eval = FALSE}
+```{r}
 get_loocv_rmse(int_model)
 get_adj_r2(int_model)
 get_num_params(int_model)
@@ -189,37 +188,46 @@ anova(back_bic, int_model)
 
 ## Discussion
 
-Based on the anova test we prefer the interaction model. But 
+To build a predictive model for player points per game, we initially created a large model that included all available variables. Subsequently, we employed a backward stepwise selection approach using the Bayesian Information Criterion (BIC) as our selection criterion. The objective of this process was to discover a model that strikes a balance between simplicity and informativeness, effectively explaining variations in player performance. The final model resulting from the backward BIC selection included variables: Games Played (G), Field Goals (FG), and Free Throws (FT). This model, referred to as the "back_bic" model, demonstrated promising predictive capabilities with an adjusted R-squared value of approximately `r get_adj_r2(back_bic)`.
 
+Additionally, we explored an interaction model that considered interactions among Games Played (G), Field Goals (FG), and Free Throws (FT). The interaction model exhibited similar predictive performance to the backward BIC-selected model, with an adjusted R-squared value of approximately `r get_adj_r2(int_model)`.
+
+Both the backward BIC-selected model and the interaction model yielded high adjusted R-squared values, indicating their ability to explain a substantial portion of the variance in player points per game. The root mean squared error (RMSE) for the backward BIC model was approximately `r get_loocv_rmse(back_bic)`, while the RMSE for the interaction model was slightly lower at approximately `r get_loocv_rmse(int_model)`. This suggests that both models are effective at predicting player performance.
+
+Furthermore, we assessed the goodness of fit for these models using quantile-quantile (Q-Q) plots and fitted vs. residual plots. In both models, the Q-Q plots generally followed the diagonal line, indicating that the residuals were approximately normally distributed. The fitted vs. residual plots showed a range between -2 and 4 for both models. As fitted values increased, the residuals deviated from 0, suggesting some heteroscedasticity.
+
+The comparison of the two models using an analysis of variance (ANOVA) test revealed an extremely low p-value (2e-16), indicating that there is a significant difference between the models. However, given the minimal difference in predictive performance and the increased complexity of the interaction model (with twice the number of parameters), the simpler backward BIC-selected model might be preferable due to its more straightforward interpretation and reduced risk of overfitting.
+
+In conclusion, our analysis of NBA player performance over time led us to construct two predictive models for player points per game. By employing systematic data preprocessing and model selection techniques, we pinpointed a concise model that highlights Games Played (G), Field Goals (FG), and Free Throws (FT) as the most influential factors in predicting player performance. This model exhibited strong predictive capabilities and a high degree of explanatory power. While the interaction model also performed well, the slight improvement in RMSE did not necessarily justify its increased complexity. Our findings highlight the importance of fundamental performance metrics and provide insights for coaches, analysts, and team managers seeking to optimize player selection and strategy based on historical trends.
 
 ## Appendix
 
-```{r, message = FALSE}
-two_pointers = nba[, c("TwoP", "TwoPA", "TwoPP")]
+```{r}
+two_pointers = raw_nba[, c("TwoP", "TwoPA", "TwoPP")]
 pairs(two_pointers)
 ```
 
-```{r, message = FALSE}
-free_throw = nba[, c("FT", "FTA", "FTP")]
+```{r}
+free_throw = raw_nba[, c("FT", "FTA", "FTP")]
 pairs(free_throw)
 ```
 
-```{r, message = FALSE}
-field_goals = nba[, c("FG", "FGA", "FGP", "eFGP")]
+```{r}
+field_goals = raw_nba[, c("FG", "FGA", "FGP", "eFGP")]
 pairs(field_goals)
 ```
 
-```{r, message = FALSE}
-rebounds = nba[, c("ORB", "DRB", "TRB")]
+```{r}
+rebounds = raw_nba[, c("ORB", "DRB", "TRB")]
 pairs(rebounds)
 ```
 
-```{r, message = FALSE}
-percentage = nba[, c("FGP", "ThreePP", "TwoPP", "eFGP", "FTP", "TRB")]
+```{r}
+percentage = raw_nba[, c("FGP", "ThreePP", "TwoPP", "eFGP", "FTP", "TRB")]
 pairs(percentage)
 ```
 
-```{r, message = FALSE}
-games = nba[, c("G", "GS", "MP")]
+```{r}
+games = raw_nba[, c("G", "GS", "MP")]
 pairs(games)
 ```
